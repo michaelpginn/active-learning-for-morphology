@@ -1,6 +1,3 @@
-# Change this path
-CONLL_SIGMORPHON_DATA_PATH="/Users/mpsilfve/src/conll2017/"
-
 import click
 
 from tqdm import tqdm
@@ -39,42 +36,34 @@ EMBEDDING_DIM=50
 RNN_HIDDEN_DIM=50
 RNN_LAYERS=1
 
-word_tok = lambda x: [c for c in x]
+word_tok = lambda x: [c for y in x.split(" ") for c in y.split(";")]
 msd_tok = lambda x: ["FEAT=" + f for f in x.split(';')]
 
 WORD = Field(sequential=True, tokenize=word_tok, lower=False,
              use_vocab=True,include_lengths=True, init_token=START,
              eos_token=END)
-MSD = Field(sequential=True, tokenize=msd_tok, lower=False,use_vocab=True)
+datafields = [("input", WORD)]
 
-datafields = [("input", WORD), ("output", WORD), ("msd", MSD)]
-
-def read_data(language,setting,batch_size=1):
+def read_data(path,language,batch_size=1):
     """Read shared task training, development and test sets for a particular language and
        return torchtext Iterators to the data. 
     """
     train, dev = TabularDataset.splits(
-        path="%s/all/task1/" % CONLL_SIGMORPHON_DATA_PATH,
-        train='%s-train-%s' % (language,setting),
-        validation="%s-dev" % language,
+        path=f"{path}/{language}",
+        train=f"train.{language}.input",
+        validation=f"dev.{language}.input",
         format='tsv',
         skip_header=True,
         fields=datafields)
 
     test = TabularDataset(
-        path="%s/answers/task1/%s-uncovered-test" % (CONLL_SIGMORPHON_DATA_PATH,language),
+        path=f"{path}/{language}/tst.{language}.input",
         format='tsv',
         skip_header=True,
         fields=datafields)
 
-    # Concatenate the lemma and MSD fields into a joint input field.
-    for data in [train, dev, test]:
-        for ex in data:
-            ex.input = ex.input + ex.msd
-    
     # Build vocabularies                                                        
     WORD.build_vocab(train)
-    MSD.build_vocab(train)
 
     # Define train_iter, dev_iter and test_iter iterators over the training data, 
     # development data and test data, respectively.
@@ -97,9 +86,6 @@ def read_data(language,setting,batch_size=1):
     
     return train_iter, dev_iter, test_iter
 
-train_iter, dev_iter, test_iter = read_data(language="english",
-                                            setting="medium",
-                                            batch_size=1)
 class Encoder(nn.Module):
     def __init__(self,alphabet):
         super(Encoder,self).__init__()
@@ -139,16 +125,14 @@ class Encoder(nn.Module):
             loss.append(ex_loss.detach().numpy())
         return loss, np.average(loss)
 
-
-    train_iter, dev_iter, test_iter = read_data(language="finnish",
-                                            setting="high",
-                                            batch_size=1)
-
-def train_model(path, epochs):
+def train_model(path, language, epochs, model_file):
+    train_iter, dev_iter, test_iter = read_data(path=path,
+                                                language=language,
+                                                batch_size=1)
+    
     lm = Encoder(WORD.vocab)
     loss_function = nn.NLLLoss(ignore_index=lm.c2i[PAD],reduction='mean')
     optimizer = Adam(lm.parameters())
-    gold_dev_words = [''.join(w.output) for w in dev_iter.dataset]
 
     for epoch in range(1, epochs+1):
         tot_loss = 0 
@@ -176,13 +160,18 @@ def train_model(path, epochs):
         print(f"MEAN TRAIN LOSS: {mean_train_loss:.5f}")
         print(f"MEAN DEV LOSS: {mean_val_loss:.5f}")
 
-    torch.save(lm, path)
+    torch.save(lm, model_file)
 
-def score_strings(model_path, data_path):
-    read_data(language="english",
-              setting="medium",
-              batch_size=1)
-
+def score_strings(model_path, data_path, r):
+    def format_out(s):
+        try:
+            hashi = s.index("#")
+            lemma = ' '.join(s[:hashi])
+            msd = ';'.join(s[hashi+1:])
+            return f"{lemma} # {msd}"
+        except ValueError:
+            return " ".join(s)
+    
     model = torch.load(model_path)
 
     test = TabularDataset(
@@ -190,6 +179,8 @@ def score_strings(model_path, data_path):
         format='tsv',
         skip_header=True,
         fields=datafields)
+
+    WORD.build_vocab()
     
     test_iter = Iterator.splits(
         (test,),
@@ -201,20 +192,23 @@ def score_strings(model_path, data_path):
         repeat=False)[0]
 
     # r is an adjustable hyperparameter actually
-    losses, _ = model.val_loss(test_iter, r=1.0)
+    losses, _ = model.val_loss(test_iter, r=r if r != None else 1.0)
     for ex, loss in zip(test, losses):
-        print(f"{''.join(ex.input)}\t{loss}")
+        print(f"{format_out(ex.input)}\t{loss}")
     
 @click.command()
-@click.option("--mode", required=True)
-@click.option("--path", required=True)
+@click.option("--mode", required=False)
+@click.option("--path", required=False)
+@click.option("--language", required=False)
 @click.option("--epochs", type=int, required=False)
-@click.option("--data_path", required=False)
-def main(mode, path, epochs, data_path):
+@click.option("--model_file", required=False)
+@click.option("--test_file", required=False)
+@click.option("--r", required=False)
+def main(mode, path, language, epochs, model_file, test_file, r):
     if mode == "train":
-        train_model(path, epochs)
+        train_model(path, language, epochs, model_file)
     elif mode == "test":
-        score_strings(path, data_path)
+        score_strings(model_file, test_file, r)
     else:
         assert(0)
         
