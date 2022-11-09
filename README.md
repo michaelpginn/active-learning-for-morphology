@@ -1,4 +1,4 @@
-## 1. Generate data for language model
+## 1. Generate language model data
 
 This script will generate data for the `lm.py` script. You can generate data from lemmas or word forms (using the option `--lemma` or `--wordform`) and include the MSD or omit it (using the option `--msd` or `--no-msd`). 
 
