@@ -5,7 +5,7 @@ This script will generate data for the `lm.py` script. You can generate data eit
 If you run the script thus:
 
 ```
-$ python3 generate_lm_files.py --path data/aym --identifier aym_S1 --msd --wordform
+$ python3 src/generate_lm_files.py --path data/aym --identifier aym_S1 --msd --wordform
 ```
 
 it will create four output files:
@@ -29,13 +29,13 @@ d o g # N;PL
 ```
 
 ```
-$ python3 lm.py --mode train --train_file data/aym/train.aym_S1.msd.wordform.lm --dev_file data/aym/dev.aym_S1.msd.wordform.lm --model_file aym_S1.wordform.msd.pt --epochs 25
+$ python3 src/lm.py --mode train --train_file data/aym/train.aym_S1.msd.wordform.lm --dev_file data/aym/dev.aym_S1.msd.wordform.lm --model_file aym_S1.wordform.msd.pt --epochs 25
 ```
 
 ## 3. Score strings 
 
 ```
-$ python3 lm.py --mode test --model_file aym_S1.wordform.msd.pt --test_file data/aym/remainder.aym.msd.wordform.lm
+$ python3 src/lm.py --mode test --model_file aym_S1.wordform.msd.pt --test_file data/aym/remainder.aym.msd.wordform.lm
 ```
 
 ```
