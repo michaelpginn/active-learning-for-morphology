@@ -9,13 +9,13 @@ d o g # N;PL
 ```
 
 ```
-$ python3 lm.py --mode train --train_file data/aym/train.aym_S1.input --dev_file data/aym/dev.aym_S1.input --model_file aym.lemma+MSD.pt --epochs 25
+$ python3 lm.py --mode train --train_file data/aym/train.aym_S1.input --dev_file data/aym/dev.aym_S1.input --model_file aym_S1.lemma+MSD.pt --epochs 25
 ```
 
 ## 2. Score strings 
 
 ```
-$ python3 lm.py --mode test --model_file aym.lemma+MSD.pt --test_file data/aym/remainder.aym.input
+$ python3 lm.py --mode test --model_file aym_S1.lemma+MSD.pt --test_file data/aym/remainder.aym.input
 ```
 
 ```
