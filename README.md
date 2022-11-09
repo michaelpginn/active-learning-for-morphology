@@ -1,27 +1,34 @@
 ## 1. Train LM
 
+The training and development data can contain any combination of lemma/wordform and with/without MSD. Make sure to use the same configuration when running in test mode.
+
+Input characters need to be separated by spaces and MSD features by semicolons. E.g.:
+
 ```
-$ python3 lm.py --mode train --path data --language ady --epochs 10 --model_file ady.model.pt
+d o g # N;PL
+```
+
+```
+$ python3 lm.py --mode train --train_file data/aym/train.aym_S1.input --dev_file data/aym/dev.aym_S1.input --model_file aym.lemma+MSD.pt --epochs 25
 ```
 
 ## 2. Score strings 
 
 ```
-$ python3 lm.py --mode test --model_file ady.model.pt --test_file data/ady/resample.ady.input
+$ python3 lm.py --mode test --model_file aym.lemma+MSD.pt --test_file data/aym/remainder.aym.input
 ```
 
 ```
 Output:
 
-л ъ э б ы ӏ у # N;ERG;PL;DEF    0.9889280796051025
-Х ь а о # N;INS;SG;DEF  1.314743995666504
-к ъ а з м а к ъ б з ы у # N;INS;PL;NDEF 0.6802042722702026
-ж ъ э р ы м # N;ERG;SG;DEF      1.0803543329238892
-ж ъ о т # N;INS;SG;DEF  1.314743995666504
-п э г ъ у а н э # N;NOM;PL      0.9889280796051025
-ш а м г ь э н # N;INS;SG;NDEF   0.9889280796051025
-ч ъ у ж ъ # N;NDEF;SG   1.314743995666504
-б э г ь э х ъ # N;INS;PL;NDEF   0.9889280796051025
-ц у м п э # N;NOM;SG    1.314743995666504
-б ж ь ы н ы ф ы ц # N;NOM;SG    0.9096539616584778
+q u r p a n i # N;ACC;PL;PSS2S  1.2571778297424316
+i n a m u k u # V;CF;PRS/PST+IMMED;3;SG;AC1+INCL        1.0466982126235962
+j a m p ' a t i # V;CF;PRS/PST+IMMED;1;SG;AC3   0.9639571905136108
+s u q ' u s a # N;PROPR 1.5546469688415527
+l a q a t u # N;GEN;PL  1.5546469688415527
+a n u   q a l l u # N;PRP;PL;PSS1S      0.9639571905136108
+t u m a y k u # N;INTER;PSS3S   1.392483115196228
+c h u q i l l a # N;TERM;PL;PSS1PL      1.1433143615722656
+a n a t a # V;FUT;2;SG;AC1      1.392483115196228
 ```
+
