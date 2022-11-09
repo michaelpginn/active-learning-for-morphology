@@ -44,20 +44,14 @@ WORD = Field(sequential=True, tokenize=word_tok, lower=False,
              eos_token=END)
 datafields = [("input", WORD)]
 
-def read_data(path,language,batch_size=1):
+def read_data(train_file,dev_file,batch_size=1):
     """Read shared task training, development and test sets for a particular language and
        return torchtext Iterators to the data. 
     """
     train, dev = TabularDataset.splits(
-        path=f"{path}/{language}",
-        train=f"train.{language}.input",
-        validation=f"dev.{language}.input",
-        format='tsv',
-        skip_header=True,
-        fields=datafields)
-
-    test = TabularDataset(
-        path=f"{path}/{language}/tst.{language}.input",
+        path=".",
+        train=train_file,
+        validation=dev_file,
         format='tsv',
         skip_header=True,
         fields=datafields)
@@ -75,16 +69,16 @@ def read_data(path,language,batch_size=1):
         sort_within_batch=False,
         repeat=False)
 
-    dev_iter, test_iter = Iterator.splits(
-        (dev, test),
-        batch_sizes=(batch_size,batch_size),
+    dev_iter = Iterator.splits(
+        (dev,),
+        batch_sizes=(batch_size,),
         device="cpu",
         sort=False,
         sort_within_batch=False,
         shuffle=False,
-        repeat=False)
+        repeat=False)[0]
     
-    return train_iter, dev_iter, test_iter
+    return train_iter, dev_iter
 
 class Encoder(nn.Module):
     def __init__(self,alphabet):
@@ -125,10 +119,10 @@ class Encoder(nn.Module):
             loss.append(ex_loss.detach().numpy())
         return loss, np.average(loss)
 
-def train_model(path, language, epochs, model_file):
-    train_iter, dev_iter, test_iter = read_data(path=path,
-                                                language=language,
-                                                batch_size=1)
+def train_model(train_file, dev_file, epochs, model_file):
+    train_iter, dev_iter = read_data(train_file,
+                                     dev_file,
+                                     batch_size=1)
     
     lm = Encoder(WORD.vocab)
     loss_function = nn.NLLLoss(ignore_index=lm.c2i[PAD],reduction='mean')
@@ -162,7 +156,7 @@ def train_model(path, language, epochs, model_file):
 
     torch.save(lm, model_file)
 
-def score_strings(model_path, data_path, r):
+def score_strings(test_file, model_path, r):
     def format_out(s):
         try:
             hashi = s.index("#")
@@ -175,7 +169,7 @@ def score_strings(model_path, data_path, r):
     model = torch.load(model_path)
 
     test = TabularDataset(
-        path=data_path,
+        path=test_file,
         format='tsv',
         skip_header=True,
         fields=datafields)
@@ -197,18 +191,18 @@ def score_strings(model_path, data_path, r):
         print(f"{format_out(ex.input)}\t{loss}")
     
 @click.command()
-@click.option("--mode", required=False)
-@click.option("--path", required=False)
-@click.option("--language", required=False)
+@click.option("--mode", required=True)
+@click.option("--train_file", required=False)
+@click.option("--dev_file", required=False)
 @click.option("--epochs", type=int, required=False)
-@click.option("--model_file", required=False)
+@click.option("--model_file", required=True)
 @click.option("--test_file", required=False)
 @click.option("--r", required=False)
-def main(mode, path, language, epochs, model_file, test_file, r):
+def main(mode, train_file, dev_file, epochs, model_file, test_file, r):
     if mode == "train":
-        train_model(path, language, epochs, model_file)
+        train_model(train_file, dev_file, epochs, model_file)
     elif mode == "test":
-        score_strings(model_file, test_file, r)
+        score_strings(test_file, model_file, r)
     else:
         assert(0)
         
