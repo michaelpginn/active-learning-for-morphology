@@ -41,14 +41,11 @@ $ python3 lm.py --mode test --model_file aym_S1.wordform.msd.pt --test_file data
 ```
 Output:
 
-q u r p a n i # N;ACC;PL;PSS2S  1.2571778297424316
-i n a m u k u # V;CF;PRS/PST+IMMED;3;SG;AC1+INCL        1.0466982126235962
-j a m p ' a t i # V;CF;PRS/PST+IMMED;1;SG;AC3   0.9639571905136108
-s u q ' u s a # N;PROPR 1.5546469688415527
-l a q a t u # N;GEN;PL  1.5546469688415527
-a n u   q a l l u # N;PRP;PL;PSS1S      0.9639571905136108
-t u m a y k u # N;INTER;PSS3S   1.392483115196228
-c h u q i l l a # N;TERM;PL;PSS1PL      1.1433143615722656
-a n a t a # V;FUT;2;SG;AC1      1.392483115196228
+q u r p a n i m a n a k # N;ACC;PL;PSS2S        0.8892036080360413
+i n a m u k u s i t a s p h a # V;CF;PRS/PST+IMMED;3;SG;AC1+INCL        0.6871673464775085
+j a m p ' a t i r i k t a # V;CF;PRS/PST+IMMED;1;SG;AC3 0.7563802003860474
+s u q ' u s a n i # N;PROPR     1.2417206764221191
+l a q a t u n a k a n a # N;GEN;PL      0.9438567161560059
+a n u   q a l l u x a n a k a l a y k u # N;PRP;PL;PSS1S        0.5791661143302917
 ```
 
