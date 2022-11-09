@@ -1,6 +1,6 @@
 ## 1. Generate language model data
 
-This script will generate data for the `lm.py` script. You can generate data from lemmas or word forms (using the option `--lemma` or `--wordform`) and include the MSD or omit it (using the option `--msd` or `--no-msd`). 
+This script will generate data for the `lm.py` script. You can generate data either from lemmas or word forms (using the option `--lemma` or `--wordform`) and include MSDs or omit them (using the option `--msd` or `--no-msd`). 
 
 If you run the script thus:
 
@@ -16,7 +16,7 @@ data/aym/remainder.aym.msd.wordform.lm
 data/aym/tst.aym_S1.msd.wordform.lm
 ```
 
-The files `train.aym_S1.msd.wordform.lm` and `dev.aym_S1.msd.wordform.lm` needed to train the language model, the strings in file `remainder.aym.msd.wordform.lm` can be scored using the trained language model and `tst.aym_S1.msd.wordform.lm` is included for completeness.
+The files `train.aym_S1.msd.wordform.lm` and `dev.aym_S1.msd.wordform.lm` are used to train the language model, the strings in file `remainder.aym.msd.wordform.lm` can be scored using the trained language model and `tst.aym_S1.msd.wordform.lm` is included for completeness.
 
 ## 2. Train LM
 
