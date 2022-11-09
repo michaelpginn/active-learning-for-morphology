@@ -1,4 +1,24 @@
-## 1. Train LM
+## 1. Generate data for language model
+
+This script will generate data for the `lm.py` script. You can generate data from lemmas or word forms (using the option `--lemma` or `--wordform`) and include the MSD or omit it (using the option `--msd` or `--no-msd`). 
+
+If you run the script thus:
+
+```
+$ python3 generate_lm_files.py --path data/aym --identifier aym_S1 --msd --wordform
+```
+
+it will create four output files:
+```
+data/aym/dev.aym_S1.msd.wordform.lm
+data/aym/train.aym_S1.msd.wordform.lm
+data/aym/remainder.aym.msd.wordform.lm
+data/aym/tst.aym_S1.msd.wordform.lm
+```
+
+The files `train.aym_S1.msd.wordform.lm` and `dev.aym_S1.msd.wordform.lm` needed to train the language model, the strings in file `remainder.aym.msd.wordform.lm` can be scored using the trained language model and `tst.aym_S1.msd.wordform.lm` is included for completeness.
+
+## 2. Train LM
 
 The training and development data can contain any combination of lemma/wordform and with/without MSD. Make sure to use the same configuration when running in test mode.
 
@@ -12,7 +32,7 @@ d o g # N;PL
 $ python3 lm.py --mode train --train_file data/aym/train.aym_S1.input --dev_file data/aym/dev.aym_S1.input --model_file aym_S1.lemma+MSD.pt --epochs 25
 ```
 
-## 2. Score strings 
+## 3. Score strings 
 
 ```
 $ python3 lm.py --mode test --model_file aym_S1.lemma+MSD.pt --test_file data/aym/remainder.aym.input
